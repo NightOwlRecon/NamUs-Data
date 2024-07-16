@@ -8,7 +8,7 @@ def main():
     # could hard-code these instead of making a request - highly unlikely to change
     states = requests.get("https://www.namus.gov/api/CaseSets/NamUs/States").json()
 
-    with open("output.json", "w") as outfile:
+    with open("output.jsonl", "w") as outfile:
         for state in states:
             res = requests.post(
                 "https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Search",
@@ -31,7 +31,6 @@ def main():
             ids = [case["namus2Number"] for case in res["results"]]
             print("Found {count} cases in {state}".format(count=len(ids), state=state["name"]))
             case_ids += ids
-            break
 
         print("Found {} total cases".format(len(case_ids)))
 
