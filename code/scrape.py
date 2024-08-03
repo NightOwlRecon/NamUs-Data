@@ -72,7 +72,7 @@ def main():
             print(f"Getting case ID {case_id} ({i+1}/{len(case_ids)} - {100*(i+1)/len(case_ids):.2f}%)")
             try:
                 case = get_case_by_id(case_id)
-                cases[id] = case
+                cases[case_id] = case
                 failures = 0
                 save_cases(cases)
                 break
