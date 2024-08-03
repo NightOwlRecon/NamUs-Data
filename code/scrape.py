@@ -10,6 +10,13 @@ def load_stored_cases():
     return cases
 
 
+def save_cases(cases):
+    # this is a very naive way to save cases - we should probably use a database
+    # or do at least avoid rewriting the entire contents on each page load
+    with open("cases.json", "w") as f:
+        json.dump(cases, f)
+
+
 def get_states():
     # could hard-code these instead of making a request - highly unlikely to change
     # don't bother catching exceptions here - if this fails we have bigger issues
@@ -67,6 +74,7 @@ def main():
                 case = get_case_by_id(case_id)
                 cases[id] = case
                 failures = 0
+                save_cases(cases)
                 break
             except Exception as e:
                 print(f"Failed to get case ID {case_id}: {e}")
