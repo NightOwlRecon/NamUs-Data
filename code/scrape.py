@@ -1,44 +1,83 @@
 import json
+import time
+
 import requests
 
 
+def load_stored_cases():
+    with open("cases.json", "r") as f:
+        cases = json.load(f)
+    return cases
+
+
+def get_states():
+    # could hard-code these instead of making a request - highly unlikely to change
+    # don't bother catching exceptions here - if this fails we have bigger issues
+    states = [state["name"] for state in requests.get("https://www.namus.gov/api/CaseSets/NamUs/States").json()]
+    return states
+
+
+def get_cases_by_state(state):
+    res = requests.post(
+        "https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Search",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(
+            {
+                "take": 10000,
+                "projections": ["namus2Number"],
+                "predicates": [
+                    {
+                        "field": "stateOfLastContact",
+                        "operator": "IsIn",
+                        "values": [state],
+                    }
+                ],
+            }
+        ),
+    ).json()
+
+    case_ids = [case["namus2Number"] for case in res["results"]]
+    return case_ids
+
+
+def get_case_by_id(case_id):
+    case = requests.get(f"https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Cases/{case_id}").json()
+    return case
+
+
 def main():
+    failures = 0
+    cases = {}
     case_ids = []
 
-    # could hard-code these instead of making a request - highly unlikely to change
-    states = requests.get("https://www.namus.gov/api/CaseSets/NamUs/States").json()
+    states = get_states()
 
-    with open("output.jsonl", "w") as outfile:
-        for state in states:
-            res = requests.post(
-                "https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Search",
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(
-                    {
-                        "take": 10000,
-                        "projections": ["namus2Number"],
-                        "predicates": [
-                            {
-                                "field": "stateOfLastContact",
-                                "operator": "IsIn",
-                                "values": [state["name"]],
-                            }
-                        ],
-                    }
-                ),
-            ).json()
+    for state in states:
+        ids = get_cases_by_state(state)
+        print(f"Found {len(ids)} cases in {state}")
+        case_ids += ids
 
-            ids = [case["namus2Number"] for case in res["results"]]
-            print("Found {count} cases in {state}".format(count=len(ids), state=state["name"]))
-            case_ids += ids
+    print(f"Found {len(case_ids)} total cases")
 
-        print("Found {} total cases".format(len(case_ids)))
-
-        for i in range(len(case_ids)):
+    for i in range(len(case_ids)):
+        while True:
             case_id = case_ids[i]
-            print("Getting case id {id} ({index}/{total})".format(id=case_id, index=i, total=len(case_ids)))
-            res = requests.get("https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Cases/{id}".format(id=case_id)).json()
-            outfile.write(json.dumps(res) + "\n")
+            print(f"Getting case ID {case_id} ({i+1}/{len(case_ids)} - {100*(i+1)/len(case_ids):.2f}%)")
+            try:
+                case = get_case_by_id(case_id)
+                cases[id] = case
+                failures = 0
+                break
+            except Exception as e:
+                print(f"Failed to get case ID {case_id}: {e}")
+                failures += 1
+                if failures == 13: # 2^12 = 4096 seconds = ~68 minutes
+                    print("Too many failures, exiting")
+                    return
+                # very dumb exponential backoff
+                delay_s = pow(2, failures)
+                print(f"Failures: {failures}, sleeping for {delay_s} seconds")
+                time.sleep(delay_s)
 
 
 if __name__ == '__main__':
