@@ -1,3 +1,4 @@
+import datetime
 import json
 import time
 
@@ -13,7 +14,8 @@ def load_stored_cases():
 def save_cases(cases):
     # this is a very naive way to save cases - we should probably use a database
     # or do at least avoid rewriting the entire contents on each page load
-    with open("cases.json", "w") as f:
+    date = datetime.datetime.now().strftime("%Y%m%d")
+    with open(f"output/cases-{date}.json", "w") as f:
         json.dump(cases, f)
 
 
@@ -54,7 +56,7 @@ def get_case_by_id(case_id):
 
 def main():
     failures = 0
-    cases = {}
+    cases = []
     case_ids = []
 
     states = get_states()
@@ -72,7 +74,7 @@ def main():
             print(f"Getting case ID {case_id} ({i+1}/{len(case_ids)} - {100*(i+1)/len(case_ids):.2f}%)")
             try:
                 case = get_case_by_id(case_id)
-                cases[case_id] = case
+                cases += case
                 failures = 0
                 break
             except Exception as e:
