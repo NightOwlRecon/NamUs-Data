@@ -13,7 +13,6 @@ def load_stored_cases():
 
 def save_cases(cases):
     # this is a very naive way to save cases - we should probably use a database
-    # or do at least avoid rewriting the entire contents on each page load
     date = datetime.datetime.now().strftime("%Y%m%d")
     with open(f"output/cases-{date}.json", "w") as f:
         json.dump(cases, f)
