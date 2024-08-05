@@ -64,7 +64,7 @@ def main():
     for state in states:
         ids = get_cases_by_state(state)
         print(f"Found {len(ids)} cases in {state}")
-        case_ids += ids
+        case_ids.extend(ids)
 
     print(f"Found {len(case_ids)} total cases")
 
