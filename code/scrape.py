@@ -74,18 +74,20 @@ def main():
                 case = get_case_by_id(case_id)
                 cases[case_id] = case
                 failures = 0
-                save_cases(cases)
                 break
             except Exception as e:
                 print(f"Failed to get case ID {case_id}: {e}")
+
+                # very dumb exponential backoff
                 failures += 1
                 if failures == 13: # 2^12 = 4096 seconds = ~68 minutes
                     print("Too many failures, exiting")
                     return
-                # very dumb exponential backoff
                 delay_s = pow(2, failures)
                 print(f"Failures: {failures}, sleeping for {delay_s} seconds")
                 time.sleep(delay_s)
+
+    save_cases(cases)
 
 
 if __name__ == '__main__':
