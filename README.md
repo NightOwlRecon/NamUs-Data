@@ -1,4 +1,4 @@
-# NamUs Scraper + Database Dump
+# NamUs Scraper + Database Dumps
 
 This repository contains a very basic Python script that scrapes the contents of the NamUs database for missing persons and unidentified persons via their API.
 
