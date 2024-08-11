@@ -4,7 +4,8 @@ import time
 
 import requests
 
-
+# currently unused except for manual reformatting of previous output
+# may be useful in situations where we only want to query records we don't already have a copy of
 def load_stored_cases():
     with open("output/namus-20240811.json", "r") as f:
         cases = json.load(f)
