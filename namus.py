@@ -19,7 +19,7 @@ def save_cases(cases):
     # sort by case ID first
     cases.sort(key=lambda x: x["id"])
 
-    with open(f"output/namus-{date}.json2", "w") as f:
+    with open(f"output/namus-{date}.json", "w") as f:
         # handling this manually to keep a one-case-per-line format for easy diffing while still maintaining a valid
         # JSON object (versus jsonlines which would add another dependency for using the data)
 
