@@ -6,6 +6,8 @@ This repository also contains weekly dumps of the full contents of the NamUs dat
 
 The only Python dependency needed is `requests`
 
+JSON dumps are provided in a format that should also work with common Unix-like tools such as `diff` and `wc` and `grep`.
+
 # Volunteering / Contributing
 
 Night Owl Reconnaissance is a 501(c)3 non-profit organization that is dedicated to using detection and investigation techniques to find missing persons and provide survivor services to those who have been missing and are now recovered. Our team of professionals consists of dedicated volunteers who are passionate about our mission.
