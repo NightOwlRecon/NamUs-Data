@@ -70,7 +70,7 @@ def get_cases_by_state(state):
 
 
 def get_case_by_id(case_id):
-    case = requests.get(f"https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Cases/{case_id}").json()
+    case = requests.get(f"https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Cases/{case_id}")
     return case
 
 
@@ -94,11 +94,13 @@ def main():
             print(f"Getting case ID {case_id} ({i+1}/{len(case_ids)} - {100*(i+1)/len(case_ids):.2f}%)")
             try:
                 case = get_case_by_id(case_id)
-                cases.append(case)
+                cases.append(case.json())
                 failures = 0
                 break
             except Exception as e:
                 print(f"Failed to get case ID {case_id}: {e}")
+                print(case)
+                print(case.text)
 
                 # very dumb exponential backoff
                 failures += 1
