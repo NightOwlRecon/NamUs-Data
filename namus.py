@@ -96,15 +96,26 @@ def main():
                 case = get_case_by_id(case_id)
                 cases.append(case.json())
                 failures = 0
-                break
+                break  # this break exits from the exponential backoff loop
             except Exception as e:
                 print(f"Failed to get case ID {case_id}: {e}")
                 print(case)
                 print(case.text)
+                print(case.status_code)
+
+                # a 404 response seems to indicate that the case was removed
+                # between the time hat the search results were generated and
+                # the time that we tried to fetch the case, so we simply skip
+                # it.
+                # unsure if this actually indicates the case was removed
+                # after the time we executed the search, or if those results
+                # were stale when we got them.
+                if case.status_code == 404:
+                    break  # move on to the next case
 
                 # very dumb exponential backoff
                 failures += 1
-                if failures == 13: # 2^12 = 4096 seconds = ~68 minutes
+                if failures == 13:  # 2^12 = 4096 seconds = ~68 minutes
                     print("Too many failures, exiting")
                     return
                 delay_s = pow(2, failures)
